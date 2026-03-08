@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ระบบจองคิว กยศ | คณะวิศวกรรมศาสตร์ มหาวิทยาลัยศิลปากร</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{
+      --primary: #009975;--primary-dark:#09644f;--success:#2e7d32;
+      --warning:#f57c00;--danger:#c62828;--shadow:0 4px 20px rgba(0,0,0,0.15);
+    }
+    body{font-family:'Noto Sans Thai',sans-serif;background:linear-gradient(135deg,#0e9e7c,#09b990,#08ca9d);min-height:100vh;}
+    .hidden{display:none!important;}
+
+    /* ── NAVBAR ── */
+    .navbar{background:rgba(255,255,255,0.12);backdrop-filter:blur(10px);padding:12px 20px;
+      display:flex;justify-content:space-between;align-items:center;
+      position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,255,255,0.2);}
+    .nav-brand{display:flex;align-items:center;gap:12px;color:#fff;}
+    .nav-logo{width:42px;height:42px;background:#fff;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;font-size:20px;}
+    .nav-title h2{font-size:14px;font-weight:700;}
+    .nav-title p{font-size:11px;opacity:.8;}
+    .nav-right{display:flex;align-items:center;gap:10px;}
+    .user-badge{background:rgba(255,255,255,0.2);color:#fff;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;}
+    .btn-logout{background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.4);
+      padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;transition:.3s;font-family:inherit;}
+    .btn-logout:hover{background:rgba(255,255,255,0.3);}
+
+    /* ── LOGIN ── */
+    .login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+    .login-box{background:#fff;border-radius:24px;padding:36px 32px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+    .login-hd{text-align:center;margin-bottom:24px;}
+    .login-logo{width:68px;height:68px;background:linear-gradient(135deg,#1565c0,#0d47a1);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px;}
+    .login-hd h2{color:var(--primary);font-size:19px;font-weight:700;}
+    .login-hd p{color:#666;font-size:12px;margin-top:4px;line-height:1.5;}
+    .role-tabs{display:flex;background:#f0f4ff;border-radius:12px;padding:4px;margin-bottom:22px;gap:3px;}
+    .role-tab{flex:1;padding:9px 6px;border:none;background:transparent;border-radius:8px;
+      font-size:12px;font-weight:600;color:#666;cursor:pointer;transition:.3s;font-family:inherit;}
+    .role-tab.active{background:var(--primary);color:#fff;box-shadow:0 3px 10px rgba(21,101,192,0.4);}
+
+    /* ── FORM ── */
+    .fg{margin-bottom:14px;}
+    .fl{display:block;font-size:12px;font-weight:600;color:#333;margin-bottom:5px;}
+    .fi,.fs{width:100%;padding:11px 13px;border:2px solid #e0e0e0;border-radius:10px;
+      font-size:13px;transition:.3s;outline:none;color:#333;background:#fff;font-family:inherit;}
+    .fi:focus,.fs:focus{border-color:var(--primary);}
+    .fta{width:100%;padding:11px 13px;border:2px solid #e0e0e0;border-radius:10px;
+      font-size:13px;outline:none;color:#333;background:#fff;font-family:inherit;resize:vertical;min-height:90px;transition:.3s;}
+    .fta:focus{border-color:var(--primary);}
+    .input-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    @media(max-width:480px){.input-row{grid-template-columns:1fr;}}
+
+    /* ── BUTTONS ── */
+    .btn-p{width:100%;padding:13px;background:linear-gradient(135deg,#1565c0,#0d47a1);color:#fff;
+      border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;
+      transition:.3s;box-shadow:0 4px 15px rgba(21,101,192,0.4);font-family:inherit;}
+    .btn-p:hover{opacity:.9;transform:translateY(-1px);}
+    .btn-s{padding:9px 16px;background:var(--success);color:#fff;border:none;border-radius:8px;
+      font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:.3s;}
+    .btn-s:hover{opacity:.85;}
+    .btn-w{padding:9px 16px;background:var(--warning);color:#fff;border:none;border-radius:8px;
+      font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:.3s;}
+    .btn-w:hover{opacity:.85;}
+    .btn-d{padding:9px 16px;background:var(--danger);color:#fff;border:none;border-radius:8px;
+      font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:.3s;}
+    .btn-d:hover{opacity:.85;}
+    .btn-outline{width:100%;padding:11px;background:#f0f4ff;color:var(--primary);
+      border:2px solid var(--primary);border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;transition:.3s;font-family:inherit;}
+    .btn-outline:hover{background:var(--primary);color:#fff;}
+
+    /* ── CARD ── */
+    .card{background:#fff;border-radius:16px;padding:22px;box-shadow:var(--shadow);margin-bottom:18px;}
+    .card-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:12px;border-bottom:2px solid #f0f0f0;flex-wrap:wrap;gap:8px;}
+    .card-title{font-size:15px;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:8px;}
+
+    /* ── PAGE TABS ── */
+    .page-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+    .ptab{padding:9px 18px;border:none;background:rgba(255,255,255,0.2);color:#fff;
+      border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;transition:.3s;font-family:inherit;}
+    .ptab.active{background:#fff;color:var(--primary);box-shadow:0 4px 15px rgba(0,0,0,0.15);}
+    .ptab:hover:not(.active){background:rgba(255,255,255,0.3);}
+
+    /* ── SERVICE CARDS ── */
+    .svc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+    .svc-card{border:2px solid #e0e0e0;border-radius:12px;padding:14px 10px;text-align:center;
+      cursor:pointer;transition:.3s;font-size:12px;color:#555;}
+    .svc-card:hover{border-color:var(--primary);background:#f0f4ff;}
+    .svc-card.sel{border-color:var(--primary);background:#e3f0ff;color:var(--primary);font-weight:600;}
+    .svc-card .ic{font-size:24px;margin-bottom:5px;}
+
+    /* ── TIME GRID ── */
+    .time-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+    .tbtn{padding:9px 5px;border:2px solid #e0e0e0;border-radius:9px;font-size:12px;
+      text-align:center;cursor:pointer;transition:.3s;color:#444;background:#fff;font-family:inherit;}
+    .tbtn:hover{border-color:var(--primary);background:#f0f4ff;}
+    .tbtn.sel{border-color:var(--primary);background:var(--primary);color:#fff;font-weight:600;}
+    .tbtn.dis{background:#f5f5f5;color:#bbb;cursor:not-allowed;border-color:#eee;}
+
+    /* ── FILE UPLOAD ── */
+    .upload-area{border:2px dashed #b0bec5;border-radius:12px;padding:22px;text-align:center;
+      cursor:pointer;transition:.3s;background:#fafafa;}
+    .upload-area:hover{border-color:var(--primary);background:#f0f4ff;}
+    .upload-area .ui{font-size:32px;margin-bottom:6px;}
+    .upload-area p{font-size:12px;color:#666;}
+    .upload-area input{display:none;}
+    .file-item{display:flex;align-items:center;justify-content:space-between;
+      padding:7px 11px;background:#e8f5e9;border-radius:8px;margin-top:6px;font-size:12px;}
+    .file-item-l{display:flex;align-items:center;gap:7px;}
+    .file-rm{background:none;border:none;color:var(--danger);cursor:pointer;font-size:15px;font-family:inherit;}
+
+    /* ── BADGES ── */
+    .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+    .bw{background:#fff3cd;color:#856404;}
+    .ba{background:#d1e7dd;color:#0f5132;}
+    .br{background:#f8d7da;color:#842029;}
+    .bc{background:#cff4fc;color:#055160;}
+    .bd{background:#e2e3e5;color:#383d41;}
+    .bdi{background:#e3f2fd;color:#1565c0;}
+
+    /* ── TABLE ── */
+    .tbl-wrap{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;font-size:12px;}
+    th{background:#f0f4ff;color:var(--primary);font-weight:700;padding:11px;text-align:left;border-bottom:2px solid #e0e0e0;}
+    td{padding:11px;border-bottom:1px solid #f0f0f0;color:#333;vertical-align:middle;}
+    tr:hover td{background:#fafafa;}
+
+    /* ── STATS ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:20px;}
+    .stat-card{background:#fff;border-radius:14px;padding:18px;text-align:center;box-shadow:var(--shadow);}
+    .stat-card .si{font-size:28px;margin-bottom:6px;}
+    .stat-card .sn{font-size:26px;font-weight:800;color:var(--primary);}
+    .stat-card .sl{font-size:11px;color:#666;margin-top:3px;}
+
+    /* ── MODAL ── */
+    .modal-ov{position:fixed;top:0;left:0;width:100%;height:100%;
+      background:rgba(0,0,0,0.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;}
+    .modal{background:#fff;border-radius:20px;padding:26px;width:100%;max-width:500px;
+      max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+    .modal-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:12px;border-bottom:2px solid #f0f0f0;}
+    .modal-title{font-size:15px;font-weight:700;color:var(--primary);}
+    .modal-close{background:#f0f0f0;border:none;width:30px;height:30px;border-radius:50%;
+      font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;}
+
+    /* ── QUEUE RESULT ── */
+    .q-result{background:linear-gradient(135deg,#1565c0,#0d47a1);border-radius:14px;
+      padding:22px;text-align:center;color:#fff;margin:14px 0;}
+    .q-result .qn{font-size:52px;font-weight:900;line-height:1;}
+    .q-result .ql{font-size:12px;opacity:.8;margin-bottom:6px;}
+    .det-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e0e0e0;font-size:12px;}
+    .det-row:last-child{border-bottom:none;}
+    .det-row .dl{color:#777;}
+    .det-row .dv{font-weight:600;color:#333;text-align:right;}
+
+    /* ── ALERTS ── */
+    .alert{padding:10px 14px;border-radius:9px;font-size:12px;margin-bottom:14px;}
+    .ae{background:#fdecea;color:var(--danger);border-left:4px solid var(--danger);}
+    .as{background:#e8f5e9;color:var(--success);border-left:4px solid var(--success);}
+    .ai{background:#e3f2fd;color:var(--primary);border-left:4px solid var(--primary);}
+    .aw{background:#fff8e1;color:var(--warning);border-left:4px solid var(--warning);}
+
+    /* ── COMMENT ── */
+    .cmt-box{background:#fff8e1;border-left:4px solid var(--warning);border-radius:0 9px 9px 0;padding:12px;margin-top:10px;}
+    .cmt-hd{font-size:11px;color:var(--warning);font-weight:700;margin-bottom:4px;}
+    .cmt-txt{font-size:12px;color:#333;line-height:1.5;}
+
+    /* ── DOC ITEM ── */
+    .doc-item{display:flex;align-items:center;justify-content:space-between;
+      padding:10px 13px;background:#f8f9fa;border-radius:9px;border:1px solid #e0e0e0;margin-bottom:6px;}
+    .doc-item-l{display:flex;align-items:center;gap:8px;font-size:12px;color:#333;}
+
+    /* ── MISC ── */
+    .divider{border:none;border-top:1px solid #e0e0e0;margin:14px 0;}
+    .err-t{color:var(--danger);font-size:11px;margin-top:3px;display:none;}
+    .footer{text-align:center;color:rgba(255,255,255,0.55);font-size:11px;padding:18px;}
+    .mc{max-width:1100px;margin:0 auto;padding:20px 14px;}
+    .booking-card{border:1px solid #e0e0e0;border-radius:12px;padding:14px;margin-bottom:10px;}
+    .bc-hd{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN PAGE ══════════════ -->
+<div id="pg-login">
+  <div class="login-wrap">
+    <div class="login-box">
+      <div class="login-hd">
+        <div class="login-logo">🎓</div>
+        <h2>ระบบจองคิว กยศ</h2>
+        <p>คณะวิศวกรรมศาสตร์และเทคโนโลยีอุตสาหกรรม<br>มหาวิทยาลัยศิลปากร</p>
+      </div>
+
+      <div class="role-tabs">
+        <button class="role-tab active" onclick="swLoginRole('student')">🎓 นักศึกษา</button>
+        <button class="role-tab" onclick="swLoginRole('admin')">🛡️ เจ้าหน้าที่</button>
+        <button class="role-tab" onclick="swLoginRole('com')">👨‍💼 กรรมการ</button>
+      </div>
+
+      <!-- Student -->
+      <div id="lf-student">
+        <div class="fg"><label class="fl">รหัสนักศึกษา</label>
+          <input class="fi" id="sl-id" placeholder="เช่น 6809XXXX" maxlength="9"/></div>
+        <div class="fg"><label class="fl">รหัสผ่าน</label>
+          <input class="fi" type="password" id="sl-pw" placeholder="รหัสผ่าน"/></div>
+        <div id="le-s" class="alert ae hidden">❌ รหัสนักศึกษาหรือรหัสผ่านไม่ถูกต้อง</div>
+        <button class="btn-p" onclick="loginStudent()">🔐 เข้าสู่ระบบ</button>
+        <hr class="divider"/>
+        <p style="text-align:center;font-size:12px;color:#666">ยังไม่มีบัญชี ?
+          <a href="#" onclick="showReg()" style="color:var(--primary);font-weight:600">ลงทะเบียนที่นี่</a></p>
+      </div>
+
+      <!-- Admin -->
+      <div id="lf-admin" class="hidden">
+        <div class="alert ai">🔑 บัญชีทดสอบ: <strong>admin</strong> / <strong>admin1234</strong></div>
+        <div class="fg"><label class="fl">ชื่อผู้ใช้</label>
+          <input class="fi" id="al-u" placeholder="username"/></div>
+        <div class="fg"><label class="fl">รหัสผ่าน</label>
+          <input class="fi" type="password" id="al-pw" placeholder="password"/></div>
+        <div id="le-a" class="alert ae hidden">❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+        <button class="btn-p" onclick="loginAdmin()">🔐 เข้าสู่ระบบ (เจ้าหน้าที่)</button>
+      </div>
+
+      <!-- Committee -->
+      <div id="lf-com" class="hidden">
+        <div class="alert ai">🔑 บัญชีทดสอบ: <strong>committee</strong> / <strong>com1234</strong></div>
+        <div class="fg"><label class="fl">ชื่อผู้ใช้</label>
+          <input class="fi" id="cl-u" placeholder="username"/></div>
+        <div class="fg"><label class="fl">รหัสผ่าน</label>
+          <input class="fi" type="password" id="cl-pw" placeholder="password"/></div>
+        <div id="le-c" class="alert ae hidden">❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+        <button class="btn-p" onclick="loginCom()">🔐 เข้าสู่ระบบ (คณะกรรมการ)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ REGISTER MODAL ══════════════ -->
+<div id="modal-reg" class="modal-ov hidden">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">📝 ลงทะเบียนนักศึกษา</div>
+      <button class="modal-close" onclick="closeReg()">✕</button>
+    </div>
+    <div class="input-row">
+      <div class="fg"><label class="fl">ชื่อ *</label><input class="fi" id="r-fn" placeholder="ชื่อ"/></div>
+      <div class="fg"><label class="fl">นามสกุล *</label><input class="fi" id="r-ln" placeholder="นามสกุล"/></div>
+    </div>
+    <div class="fg"><label class="fl">รหัสนักศึกษา * (9 หลัก)</label>
+      <input class="fi" id="r-id" placeholder="เช่น 6809XXXXX" maxlength="9"/></div>
+    <div class="fg"><label class="fl">สาขาวิชา *</label>
+      <select class="fs" id="r-br">
+        <option value="">-- เลือกสาขาวิชา --</option>
+        <option>ปิโตรเคมีและวัสดุพอลิเมอร์</option>
+        <option>วิศวกรรมอุตสาหการ</option>
+        <option>วิศวกรรมเครื่องกล</option>
+        <option>วิศวกรรมเคมี</option>
+        <option>วิศวกรรมอิเล็กทรอนิกส์และระบบคอมพิวเตอร์</option>
+        <option>วิศวกรรมการจัดการและโลจิสติกส์</option>
+        <option>วัสดุและนาโนเทคโนโลยี</option>
+        <option>วิศวกรรมกระบวนการชีวภาพ</option>
+        <option>วิศวกรรมไฟฟ้าสื่อสาร</option>
+        <option>เทคโนโลยีอาหาร</option>
+        <option>เทคโนโลยีชีวภาพ</option>
+        <option>ธุรกิจวิศวกรรม</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">ชั้นปี *</label>
+      <select class="fs" id="r-yr">
+        <option value="">-- เลือกชั้นปี --</option>
+        <option value="1">ปี 1</option><option value="2">ปี 2</option>
+        <option value="3">ปี 3</option><option value="4">ปี 4</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">เบอร์โทร *</label>
+      <input class="fi" id="r-ph" placeholder="09X-XXX-XXXX" maxlength="10"/></div>
+    <div class="fg"><label class="fl">รหัสผ่าน *</label>
+      <input class="fi" type="password" id="r-pw" placeholder="ตั้งรหัสผ่าน"/></div>
+    <div class="fg"><label class="fl">ยืนยันรหัสผ่าน *</label>
+      <input class="fi" type="password" id="r-pw2" placeholder="ยืนยันรหัสผ่าน"/></div>
+    <div id="re-err" class="alert ae hidden"></div>
+    <div id="re-ok"  class="alert as hidden"></div>
+    <button class="btn-p" onclick="doRegister()">✅ ลงทะเบียน</button>
+  </div>
+</div>
+
+<!-- ══════════════ STUDENT PAGE ══════════════ -->
+<div id="pg-student" class="hidden">
+  <div class="navbar">
+    <div class="nav-brand">
+      <div class="nav-logo">🎓</div>
+      <div class="nav-title">
+        <h2>ระบบจองคิว กยศ</h2>
+        <p>คณะวิศวกรรมศาสตร์ มหาวิทยาลัยศิลปากร</p>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="user-badge" id="s-badge">👤 --</div>
+      <button class="btn-logout" onclick="logout()">🚪 ออกจากระบบ</button>
+    </div>
+  </div>
+  <div class="mc">
+    <div class="page-tabs">
+      <button class="ptab active" onclick="swStudentTab('book')">📋 จองคิว</button>
+      <button class="ptab" onclick="swStudentTab('status')">📊 สถานะ</button>
+      <button class="ptab" onclick="swStudentTab('docs')">📎 เอกสาร</button>
+    </div>
+
+    <!-- TAB: จองคิว -->
+    <div id="st-book">
+      <div class="card">
+        <div class="card-hd"><div class="card-title">📋 จองคิว กยศ</div></div>
+        <div id="s-form">
+          <div class="fg">
+            <label class="fl">📌 ประเภทบริการ *</label>
+            <div class="svc-grid">
+              <div class="svc-card" onclick="selSvc(this,'ยื่นกู้ใหม่')"><div class="ic">📝</div>ยื่นกู้ใหม่</div>
+              <div class="svc-card" onclick="selSvc(this,'ต่อสัญญา')"><div class="ic">🔄</div>ต่อสัญญา</div>
+              <div class="svc-card" onclick="selSvc(this,'ชำระหนี้')"><div class="ic">💳</div>ชำระหนี้</div>
+              <div class="svc-card" onclick="selSvc(this,'ปรึกษาทั่วไป')"><div class="ic">💬</div>ปรึกษาทั่วไป</div>
+            </div>
+            <div class="err-t" id="e-svc">⚠️ กรุณาเลือกประเภทบริการ</div>
+          </div>
+          <div class="fg"><label class="fl">📅 วันที่นัดหมาย *</label>
+            <input type="date" class="fi" id="s-date"/>
+            <div class="err-t" id="e-date">⚠️ กรุณาเลือกวันที่</div>
+          </div>
+          <div class="fg">
+            <label class="fl">⏰ เวลา *</label>
+            <div class="time-grid">
+              <div class="tbtn" onclick="selTime(this,'08:30')">08:30</div>
+              <div class="tbtn" onclick="selTime(this,'09:00')">09:00</div>
+              <div class="tbtn" onclick="selTime(this,'09:30')">09:30</div>
+              <div class="tbtn" onclick="selTime(this,'10:00')">10:00</div>
+              <div class="tbtn" onclick="selTime(this,'10:30')">10:30</div>
+              <div class="tbtn dis">🔴 เต็ม</div>
+              <div class="tbtn" onclick="selTime(this,'13:00')">13:00</div>
+              <div class="tbtn" onclick="selTime(this,'13:30')">13:30</div>
+              <div class="tbtn" onclick="selTime(this,'14:00')">14:00</div>
+            </div>
+            <div class="err-t" id="e-time">⚠️ กรุณาเลือกเวลา</div>
+          </div>
+          <div class="fg">
+            <label class="fl">📎 แนบเอกสาร (PDF / JPG / PNG)</label>
+            <div class="upload-area" onclick="document.getElementById('fi-upload').click()">
+              <input type="file" id="fi-upload" multiple accept=".pdf,.jpg,.jpeg,.png" onchange="handleFiles(event)"/>
+              <div class="ui">📂</div>
+              <p><strong>คลิกเพื่อเลือกไฟล์</strong></p>
+              <p style="font-size:11px;color:#999;margin-top:4px">PDF, JPG, PNG — สูงสุด 10MB/ไฟล์</p>
+            </div>
+            <div id="file-list"></div>
+          </div>
+          <div class="fg"><label class="fl">📝 หมายเหตุ</label>
+            <textarea class="fta" id="s-note" placeholder="ระบุข้อมูลเพิ่มเติม..."></textarea>
+          </div>
+          <div id="book-err" class="alert ae hidden"></div>
+          <button class="btn-p" onclick="doBook()">✅ ยืนยันจองคิว</button>
+        </div>
+
+        <!-- SUCCESS -->
+        <div id="s-ok" class="hidden" style="text-align:center;padding:10px 0;">
+          <div style="font-size:56px;margin-bottom:10px;">🎉</div>
+          <h2 style="color:var(--primary);margin-bottom:6px;">จองคิวสำเร็จ!</h2>
+          <p style="color:#666;font-size:12px;">เอกสารจะถูกส่งให้คณะกรรมการตรวจสอบ</p>
+          <div class="q-result">
+            <div class="ql">หมายเลขคิวของคุณ</div>
+            <div class="qn" id="ok-qnum">A001</div>
+          </div>
+          <div style="background:#f8f9fa;border-radius:12px;padding:14px;margin:12px 0;text-align:left;">
+            <div class="det-row"><span class="dl">ชื่อ-นามสกุล</span><span class="dv" id="ok-name">-</span></div>
+            <div class="det-row"><span class="dl">สาขาวิชา</span><span class="dv" id="ok-br">-</span></div>
+            <div class="det-row"><span class="dl">บริการ</span><span class="dv" id="ok-svc">-</span></div>
+            <div class="det-row"><span class="dl">วันที่ / เวลา</span><span class="dv" id="ok-dt">-</span></div>
+            <div class="det-row"><span class="dl">เอกสารแนบ</span><span class="dv" id="ok-files">-</span></div>
+            <div class="det-row"><span class="dl">สถานะเอกสาร</span><span class="dv"><span class="badge bdi">⏳ รอตรวจสอบ</span></span></div>
+          </div>
+          <button class="btn-outline" onclick="resetBook()">🔄 จองคิวใหม่</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: สถานะ -->
+    <div id="st-status" class="hidden">
+      <div class="card">
+        <div class="card-hd"><div class="card-title">📊 สถานะการจองของฉัน</div></div>
+        <div id="s-status-list"></div>
+      </div>
+    </div>
+
+    <!-- TAB: เอกสาร -->
+    <div id="st-docs" class="hidden">
+      <div class="card">
+        <div class="card-hd"><div class="card-title">📎 เอกสารและผลตรวจสอบ</div></div>
+        <div id="s-doc-list"></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">© 2026 ระบบจองคิว กยศ | คณะวิศวกรรมศาสตร์ มหาวิทยาลัยศิลปากร</div>
+</div>
+
+<!-- ══════════════ ADMIN PAGE ══════════════ -->
+<div id="pg-admin" class="hidden">
+  <div class="navbar">
+    <div class="nav-brand">
+      <div class="nav-logo">🛡️</div>
+      <div class="nav-title">
+        <h2>Admin | ระบบจองคิว กยศ</h2>
+        <p>คณะวิศวกรรมศาสตร์ มหาวิทยาลัยศิลปากร</p>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="user-badge">🛡️ เจ้าหน้าที่</div>
+      <button class="btn-logout" onclick="logout()">🚪 ออกจากระบบ</button>
+    </div>
+  </div>
+  <div class="mc">
+    <div class="page-tabs">
+      <button class="ptab active" onclick="swAdminTab('dash')">📊 Dashboard</button>
+      <button class="ptab" onclick="swAdminTab('queue')">📋 จัดการคิว</button>
+      <button class="ptab" onclick="swAdminTab('docs')">📎 เอกสาร</button>
+      <button class="ptab" onclick="swAdminTab('stu')">👥 นักศึกษา</button>
+    </div>
+
+    <div id="at-dash">
+      <div class="stats-grid" id="a-stats"></div>
+      <div class="card">
+        <div class="card-hd"><div class="card-title">📋 การจองวันนี้</div></div>
+        <div id="a-today"></div>
+      </div>
+    </div>
+
+    <div id="at-queue" class="hidden">
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title">📋 รายการจองทั้งหมด</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <select class="fs" style="width:auto;padding:7px 10px;" id="f-sts" onchange="renderAQueue()">
+              <option value="">ทุกสถานะ</option>
+              <option>รอเรียก</option><option>กำลังดำเนินการ</option><option>เสร็จสิ้น</option>
+            </select>
+            <select class="fs" style="width:auto;padding:7px 10px;" id="f-br" onchange="renderAQueue()">
+              <option value="">ทุกสาขา</option>
+              <option>ปิโตรเคมีและวัสดุพอลิเมอร์</option>
+              <option>วิศวกรรมอุตสาหการ</option>
+              <option>วิศวกรรมเครื่องกล</option>
+              <option>วิศวกรรมเคมี</option>
+              <option>วิศวกรรมอิเล็กทรอนิกส์และระบบคอมพิวเตอร์</option>
+              <option>วิศวกรรมการจัดการและโลจิสติกส์</option>
+              <option>วัสดุและนาโนเทคโนโลยี</option>
+              <option>วิศวกรรมกระบวนการชีวภาพ</option>
+              <option>วิศวกรรมไฟฟ้าสื่อสาร</option>
+              <option>เทคโนโลยีอาหาร</option>
+              <option>เทคโนโลยีชีวภาพ</option>
+              <option>ธุรกิจวิศวกรรม</option>
+            </select>
+          </div>
+        </div>
+        <div class="tbl-wrap" id="a-queue-tbl"></div>
+      </div>
+    </div>
+
+    <div id="at-docs" class="hidden">
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-title">📎 รายการเอกสาร</div>
+          <span class="badge bdi" id="a-doc-cnt">0 รอตรวจ</span>
+        </div>
+        <div id="a-doc-list"></div>
+      </div>
+    </div>
+
+    <div id="at-stu" class="hidden">
+      <div class="card">
+        <div class="card-hd"><div class="card-title">👥 ข้อมูลนักศึกษาที่ลงทะเบียน</div></div>
+        <div class="tbl-wrap" id="a-stu-tbl"></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">© 2026 Admin Panel | กยศ คณะวิศวกรรมศาสตร์ มหาวิทยาลัยศิลปากร</div>
+</div>
+
+<!-- ══════════════ COMMITTEE PAGE ══════════════ -->
+<div id="pg-com" class="hidden">
+  <div class="navbar">
+    <div class="nav-brand">
+      <div class="nav-logo">👨‍💼</div>
+      <div class="nav-title">
+        <h2>คณะกรรมการ | ตรวจเอกสาร กยศ</h2>
+        <p>คณะวิศวกรรมศาสตร์ มหาวิทยาลัยศิลปากร</p>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="user-badge">👨‍💼 คณะกรรมการ</div>
+      <button class="btn-logout" onclick="logout()">🚪 ออกจากระบบ</button>
+    </div>
+  </div>
+  <div class="mc">
+    <div class="page-tabs">
+      <button class="ptab active" onclick="swComTab('review')">📎 รอตรวจสอบ</button>
+      <button class="ptab" onclick="swComTab('approved')">✅ อนุมัติแล้ว</button>
+      <button class="ptab" onclick="swComTab('revision')">🔴 รอแก้ไข</button>
+    </div>
+    <div id="ct-review">
+      <div class="card">
+        <div class="card-hd"><div class="card-title">📎 เอกสารรอตรวจสอบ</div></div>
+        <div id="c-review-list"></div>
+      </div>
+    </div>
+    <div id="ct-approved" class="hidden">
+      <div class="card">
+        <div class="card-hd"><div class="card-title">✅ อนุมัติแล้ว</div></div>
+        <div id="c-approved-list"></div>
+      </div>
+    </div>
+    <div id="ct-revision" class="hidden">
+      <div class="card">
+        <div class="card-hd"><div class="card-title">🔴 รอแก้ไข</div></div>
+        <div id="c-revision-list"></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">© 2024 Committee Panel | กยศ คณะวิศวกรรมศาสตร์ มหาวิทยาลัยศิลปากร</div>
+</div>
+
+<!-- ══════════════ REVIEW MODAL ══════════════ -->
+<div id="modal-review" class="modal-ov hidden">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title">🔍 ตรวจสอบเอกสาร</div>
+      <button class="modal-close" onclick="closeReview()">✕</button>
+    </div>
+    <div id="review-content"></div>
+    <div class="fg" style="margin-top:14px;">
+      <label class="fl">💬 Comment / หมายเหตุ</label>
+      <textarea class="fta" id="review-cmt" placeholder="ระบุ comment หรือสิ่งที่ต้องแก้ไข..."></textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn-s" style="flex:1;padding:12px;" onclick="doApprove()">✅ อนุมัติ</button>
+      <button class="btn-d" style="flex:1;padding:12px;" onclick="doRevision()">🔴 ขอแก้ไข</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  CONSTANTS
+// ══════════════════════════════════════════
+const ADMINS = [{u:'admin',pw:'admin1234',name:'เจ้าหน้าที่ กยศ'}];
+const COMS   = [{u:'committee',pw:'com1234',name:'อาจารย์กรรมการ'}];
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let CU=null, CR=null;       // current user, current role
+let selSvc_='', selTime_='';
+let upFiles=[];
+let reviewId=null;
+
+// ══════════════════════════════════════════
+//  STORAGE
+// ══════════════════════════════════════════
+const ld = (k,d=[])=>JSON.parse(localStorage.getItem(k)||JSON.stringify(d));
+const sv = (k,v)=>localStorage.setItem(k,JSON.stringify(v));
+
+// ══════════════════════════════════════════
+//  PAGE ROUTING
+// ══════════════════════════════════════════
+function showPg(p){
+  ['login','student','admin','com'].forEach(x=>document.getElementById('pg-'+x).classList.add('hidden'));
+  document.getElementById('pg-'+p).classList.remove('hidden');
+}
+function logout(){CU=null;CR=null;selSvc_='';selTime_='';upFiles=[];showPg('login');}
+
+// ══════════════════════════════════════════
+//  LOGIN
+// ══════════════════════════════════════════
+function swLoginRole(r){
+  ['student','admin','com'].forEach(x=>{
+    document.getElementById('lf-'+x).classList.toggle('hidden',x!==r);
+  });
+  document.querySelectorAll('.role-tab').forEach((b,i)=>{
+    b.classList.toggle('active',['student','admin','com'][i]===r);
+  });
+}
+function loginStudent(){
+  const id=V('sl-id'), pw=V('sl-pw');
+  const stus=ld('students');
+  const u=stus.find(s=>s.id===id&&s.pw===pw);
+  tog('le-s','hidden',!!u);
+  if(!u)return;
+  CU=u; CR='student';
+  document.getElementById('s-badge').textContent='👤 '+u.fn+' '+u.ln;
+  document.getElementById('s-date').min=today();
+  showPg('student');
+  loadSStatus(); loadSDocs();
+}
+function loginAdmin(){
+  const u=V('al-u'), pw=V('al-pw');
+  const a=ADMINS.find(x=>x.u===u&&x.pw===pw);
+  tog('le-a','hidden',!!a);
+  if(!a)return;
+  CU=a; CR='admin';
+  showPg('admin');
+  renderADash(); renderAQueue(); renderADocs(); renderAStu();
+}
+function loginCom(){
+  const u=V('cl-u'), pw=V('cl-pw');
+  const c=COMS.find(x=>x.u===u&&x.pw===pw);
+  tog('le-c','hidden',!!c);
+  if(!c)return;
+  CU=c; CR='com';
+  showPg('com');
+  renderCReview(); renderCApproved(); renderCRevision();
+}
+
+// ══════════════════════════════════════════
+//  REGISTER
+// ══════════════════════════════════════════
+function showReg(){document.getElementById('modal-reg').classList.remove('hidden');}
+function closeReg(){document.getElementById('modal-reg').classList.add('hidden');}
+function doRegister(){
+  const fn=V('r-fn'),ln=V('r-ln'),id=V('r-id'),br=V('r-br'),yr=V('r-yr'),ph=V('r-ph'),pw=V('r-pw'),pw2=V('r-pw2');
+  const ee=document.getElementById('re-err'), eo=document.getElementById('re-ok');
+  ee.classList.add('hidden'); eo.classList.add('hidden');
+  if(!fn||!ln||!id||!br||!yr||!ph||!pw){ee.textContent='⚠️ กรุณากรอกข้อมูลให้ครบ';ee.classList.remove('hidden');return;}
+  if(id.length!==9){ee.textContent='⚠️ รหัสนักศึกษาต้องมี 9 หลัก';ee.classList.remove('hidden');return;}
+  if(ph.length!==10){ee.textContent='⚠️ เบอร์โทรต้องมี 10 หลัก';ee.classList.remove('hidden');return;}
+  if(pw!==pw2){ee.textContent='⚠️ รหัสผ่านไม่ตรงกัน';ee.classList.remove('hidden');return;}
+  const stus=ld('students');
+  if(stus.find(s=>s.id===id)){ee.textContent='⚠️ รหัสนักศึกษานี้มีแล้ว';ee.classList.remove('hidden');return;}
+  stus.push({fn,ln,id,br,yr,ph,pw});
+  sv('students',stus);
+  eo.textContent='✅ ลงทะเบียนสำเร็จ! กรุณาเข้าสู่ระบบ';
+  eo.classList.remove('hidden');
+  setTimeout(closeReg,2000);
+}
+
+// ══════════════════════════════════════════
+//  STUDENT TABS
+// ══════════════════════════════════════════
+function swStudentTab(t){
+  ['book','status','docs'].forEach(x=>document.getElementById('st-'+x).classList.add('hidden'));
+  document.getElementById('st-'+t).classList.remove('hidden');
+  document.querySelectorAll('#pg-student .ptab').forEach((b,i)=>{
+    b.classList.toggle('active',['book','status','docs'][i]===t);
+  });
+  if(t==='status')loadSStatus();
+  if(t==='docs')loadSDocs();
+}
+
+// ══════════════════════════════════════════
+//  BOOKING
+// ══════════════════════════════════════════
+function selSvc(el,name){
+  document.querySelectorAll('.svc-card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel'); selSvc_=name;
+  document.getElementById('e-svc').style.display='none';
+}
+function selTime(el,time){
+  if(el.classList.contains('dis'))return;
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel'); selTime_=time;
+  document.getElementById('e-time').style.display='none';
+}
+function handleFiles(e){
+  Array.from(e.target.files).forEach(f=>{
+    if(!upFiles.find(x=>x.name===f.name))
+      upFiles.push({name:f.name,size:f.size,tp:f.type});
+  });
+  renderFileList();
+}
+function renderFileList(){
+  const el=document.getElementById('file-list');
+  el.innerHTML=upFiles.map((f,i)=>`
+    <div class="file-item">
+      <div class="file-item-l">
+        <span>${f.tp.includes('pdf')?'📄':'🖼️'}</span>
+        <span>${f.name}</span>
+        <span style="color:#999;font-size:10px;">(${(f.size/1024).toFixed(1)}KB)</span>
+      </div>
+      <button class="file-rm" onclick="rmFile(${i})">✕</button>
+    </div>`).join('');
+}
+function rmFile(i){upFiles.splice(i,1);renderFileList();}
+function doBook(){
+  const dt=V('s-date'), note=V('s-note');
+  let ok=true;
+  if(!selSvc_){q('e-svc').style.display='block';ok=false;}
+  if(!dt){q('e-date').style.display='block';ok=false;}
+  if(!selTime_){q('e-time').style.display='block';ok=false;}
+  if(!ok)return;
+  const bks=ld('bookings');
+  const cnt=ld('qcnt',1);
+  const qn='A'+String(cnt).padStart(3,'0');
+  sv('qcnt',cnt+1);
+  const bk={
+    id:Date.now(), q:qn, sid:CU.id,
+    sname:CU.fn+' '+CU.ln, br:CU.br, yr:CU.yr,
+    svc:selSvc_, dt, time:selTime_, note,
+    files:[...upFiles],
+    sts:'รอเรียก',
+    dsts:upFiles.length>0?'รอตรวจสอบ':'ไม่มีเอกสาร',
+    cmt:'', reviewBy:'', reviewAt:'',
+    created:new Date().toISOString()
+  };
+  bks.push(bk); sv('bookings',bks);
+  q('ok-qnum').textContent=qn;
+  q('ok-name').textContent=bk.sname;
+  q('ok-br').textContent=bk.br;
+  q('ok-svc').textContent=bk.svc;
+  q('ok-dt').textContent=fmtD(dt)+' เวลา '+selTime_+' น.';
+  q('ok-files').textContent=upFiles.length+' ไฟล์';
+  q('s-form').classList.add('hidden');
+  q('s-ok').classList.remove('hidden');
+}
+function resetBook(){
+  selSvc_=''; selTime_=''; upFiles=[];
+  document.querySelectorAll('.svc-card').forEach(c=>c.classList.remove('sel'));
+  document.querySelectorAll('.tbtn:not(.dis)').forEach(b=>b.classList.remove('sel'));
+  ['s-date','s-note'].forEach(x=>{const el=q(x);if(el)el.value='';});
+  q('file-list').innerHTML='';
+  document.querySelectorAll('.err-t').forEach(e=>e.style.display='none');
+  q('s-form').classList.remove('hidden');
+  q('s-ok').classList.add('hidden');
+}
+
+// ══════════════════════════════════════════
+//  STUDENT STATUS & DOCS
+// ══════════════════════════════════════════
+function loadSStatus(){
+  const bks=ld('bookings').filter(b=>b.sid===CU.id);
+  const el=q('s-status-list');
+  if(!bks.length){el.innerHTML='<p style="text-align:center;color:#999;padding:40px 0;">ยังไม่มีการจองคิว</p>';return;}
+  el.innerHTML=bks.sort((a,b)=>new Date(b.created)-new Date(a.created)).map(b=>`
+    <div class="booking-card">
+      <div class="bc-hd">
+        <div>
+          <span style="font-size:18px;font-weight:800;color:var(--primary);">${b.q}</span>
+          <span style="font-size:12px;color:#666;margin-left:8px;">${b.svc}</span>
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;">
+          <span class="badge ${sbCls(b.sts)}">${b.sts}</span>
+          <span class="badge ${dbCls(b.dsts)}">${b.dsts}</span>
+        </div>
+      </div>
+      <div class="det-row"><span class="dl">วันที่</span><span class="dv">${fmtD(b.dt)} เวลา ${b.time} น.</span></div>
+      <div class="det-row"><span class="dl">เอกสาร</span><span class="dv">${b.files.length} ไฟล์</span></div>
+      ${b.cmt?`<div class="cmt-box"><div class="cmt-hd">💬 Comment จากคณะกรรมการ ${b.reviewAt?'('+fmtDT(b.reviewAt)+')':''}</div><div class="cmt-txt">${b.cmt}</div></div>`:''}
+    </div>`).join('');
+}
+function loadSDocs(){
+  const bks=ld('bookings').filter(b=>b.sid===CU.id&&b.files.length>0);
+  const el=q('s-doc-list');
+  if(!bks.length){el.innerHTML='<p style="text-align:center;color:#999;padding:40px 0;">ยังไม่มีเอกสาร</p>';return;}
+  el.innerHTML=bks.map(b=>`
+    <div class="booking-card">
+      <div class="bc-hd">
+        <div>
+          <strong>${b.q}</strong>
+          <span style="font-size:12px;color:#666;margin-left:6px;">${b.svc} · ${fmtD(b.dt)}</span>
+        </div>
+        <span class="badge ${dbCls(b.dsts)}">${b.dsts}</span>
+      </div>
+      ${b.files.map(f=>`
+        <div class="doc-item">
+          <div class="doc-item-l">${f.tp.includes('pdf')?'📄':'🖼️'} ${f.name}</div>
+          <span style="font-size:10px;color:#999;">${(f.size/1024).toFixed(1)}KB</span>
+        </div>`).join('')}
+      ${b.cmt?`<div class="cmt-box"><div class="cmt-hd">💬 ${b.reviewBy} ${b.reviewAt?'('+fmtDT(b.reviewAt)+')':''}</div><div class="cmt-txt">${b.cmt}</div></div>`:''}
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+//  ADMIN TABS
+// ══════════════════════════════════════════
+function swAdminTab(t){
+  ['dash','queue','docs','stu'].forEach(x=>q('at-'+x).classList.add('hidden'));
+  q('at-'+t).classList.remove('hidden');
+  document.querySelectorAll('#pg-admin .ptab').forEach((b,i)=>{
+    b.classList.toggle('active',['dash','queue','docs','stu'][i]===t);
+  });
+  if(t==='dash')renderADash();
+  if(t==='queue')renderAQueue();
+  if(t==='docs')renderADocs();
+  if(t==='stu')renderAStu();
+}
+function renderADash(){
+  const bks=ld('bookings');
+  const td=today();
+  const tdBks=bks.filter(b=>b.dt===td);
+  const stats=[
+    {ic:'📋',n:bks.length,l:'จองทั้งหมด'},
+    {ic:'⏳',n:bks.filter(b=>b.sts==='รอเรียก').length,l:'รอเรียก'},
+    {ic:'📎',n:bks.filter(b=>b.dsts==='รอตรวจสอบ').length,l:'รอตรวจเอกสาร'},
+    {ic:'✅',n:bks.filter(b=>b.dsts==='อนุมัติแล้ว').length,l:'อนุมัติแล้ว'},
+  ];
+  q('a-stats').innerHTML=stats.map(s=>`
+    <div class="stat-card">
+      <div class="si">${s.ic}</div>
+      <div class="sn">${s.n}</div>
+      <div class="sl">${s.l}</div>
+    </div>`).join('');
+  const el=q('a-today');
+  if(!tdBks.length){el.innerHTML='<p style="text-align:center;color:#999;padding:30px 0;">ไม่มีการจองวันนี้</p>';return;}
+  el.innerHTML=`<div class="tbl-wrap"><table>
+    <thead><tr><th>คิว</th><th>ชื่อ</th><th>สาขา</th><th>บริการ</th><th>เวลา</th><th>สถานะ</th><th>เอกสาร</th></tr></thead>
+    <tbody>${tdBks.map(b=>`<tr>
+      <td><strong>${b.q}</strong></td><td>${b.sname}</td>
+      <td style="font-size:11px;">${b.br}</td><td>${b.svc}</td>
+      <td>${b.time} น.</td>
+      <td><span class="badge ${sbCls(b.sts)}">${b.sts}</span></td>
+      <td><span class="badge ${dbCls(b.dsts)}">${b.dsts}</span></td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
+function renderAQueue(){
+  let bks=ld('bookings');
+  const fs=q('f-sts')?.value||'', fb=q('f-br')?.value||'';
+  if(fs)bks=bks.filter(b=>b.sts===fs);
+  if(fb)bks=bks.filter(b=>b.br===fb);
+  const el=q('a-queue-tbl');
+  if(!bks.length){el.innerHTML='<p style="text-align:center;color:#999;padding:30px 0;">ไม่มีข้อมูล</p>';return;}
+  el.innerHTML=`<table>
+    <thead><tr><th>คิว</th><th>ชื่อ</th><th>รหัส</th><th>สาขา</th><th>บริการ</th><th>วันที่/เวลา</th><th>สถานะคิว</th><th>จัดการ</th></tr></thead>
+    <tbody>${bks.sort((a,b)=>new Date(b.created)-new Date(a.created)).map(b=>`<tr>
+      <td><strong>${b.q}</strong></td><td>${b.sname}</td>
+      <td style="font-size:11px;">${b.sid}</td>
+      <td style="font-size:11px;">${b.br}</td>
+      <td>${b.svc}</td>
+      <td style="font-size:11px;">${fmtD(b.dt)}<br>${b.time} น.</td>
+      <td><span class="badge ${sbCls(b.sts)}">${b.sts}</span></td>
+      <td>
+        <select class="fs" style="font-size:11px;padding:5px;" onchange="updQSts(${b.id},this.value)">
+          <option ${b.sts==='รอเรียก'?'selected':''}>รอเรียก</option>
+          <option ${b.sts==='กำลังดำเนินการ'?'selected':''}>กำลังดำเนินการ</option>
+          <option ${b.sts==='เสร็จสิ้น'?'selected':''}>เสร็จสิ้น</option>
+        </select>
+      </td>
+    </tr>`).join('')}</tbody></table>`;
+}
+function updQSts(id,sts){
+  const bks=ld('bookings');
+  const b=bks.find(x=>x.id===id);
+  if(b){b.sts=sts;sv('bookings',bks);renderADash();}
+}
+function renderADocs(){
+  const bks=ld('bookings').filter(b=>b.files.length>0);
+  const pending=bks.filter(b=>b.dsts==='รอตรวจสอบ').length;
+  q('a-doc-cnt').textContent=pending+' รอตรวจ';
+  const el=q('a-doc-list');
+  if(!bks.length){el.innerHTML='<p style="text-align:center;color:#999;padding:30px 0;">ไม่มีเอกสาร</p>';return;}
+  el.innerHTML=bks.sort((a,b)=>new Date(b.created)-new Date(a.created)).map(b=>`
+    <div class="booking-card">
+      <div class="bc-hd">
+        <div>
+          <strong>${b.q}</strong> — ${b.sname}
+          <div style="font-size:11px;color:#666;">${b.br} · ${b.svc} · ${fmtD(b.dt)}</div>
+        </div>
+        <span class="badge ${dbCls(b.dsts)}">${b.dsts}</span>
+      </div>
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px;">
+        ${b.files.map(f=>`<span style="background:#f0f4ff;color:var(--primary);padding:3px 9px;border-radius:20px;font-size:11px;">${f.tp.includes('pdf')?'📄':'🖼️'} ${f.name}</span>`).join('')}
+      </div>
+      ${b.cmt?`<div class="cmt-box"><div class="cmt-hd">💬 ${b.reviewBy} (${fmtDT(b.reviewAt)})</div><div class="cmt-txt">${b.cmt}</div></div>`:''}
+    </div>`).join('');
+}
+function renderAStu(){
+  const stus=ld('students');
+  const el=q('a-stu-tbl');
+  if(!stus.length){el.innerHTML='<p style="text-align:center;color:#999;padding:30px 0;">ไม่มีข้อมูล</p>';return;}
+  const bks=ld('bookings');
+  el.innerHTML=`<table>
+    <thead><tr><th>รหัส</th><th>ชื่อ-นามสกุล</th><th>สาขา</th><th>ชั้นปี</th><th>เบอร์โทร</th><th>จองแล้ว</th></tr></thead>
+    <tbody>${stus.map(s=>`<tr>
+      <td>${s.id}</td><td>${s.fn} ${s.ln}</td>
+      <td style="font-size:11px;">${s.br}</td>
+      <td>ปี ${s.yr}</td><td>${s.ph}</td>
+      <td><span class="badge bdi">${bks.filter(b=>b.sid===s.id).length} ครั้ง</span></td>
+    </tr>`).join('')}</tbody></table>`;
+}
+
+// ══════════════════════════════════════════
+//  COMMITTEE TABS
+// ══════════════════════════════════════════
+function swComTab(t){
+  ['review','approved','revision'].forEach(x=>q('ct-'+x).classList.add('hidden'));
+  q('ct-'+t).classList.remove('hidden');
+  document.querySelectorAll('#pg-com .ptab').forEach((b,i)=>{
+    b.classList.toggle('active',['review','approved','revision'][i]===t);
+  });
+}
+function renderCReview(){
+  const bks=ld('bookings').filter(b=>b.dsts==='รอตรวจสอบ'&&b.files.length>0);
+  const el=q('c-review-list');
+  if(!bks.length){el.innerHTML='<p style="text-align:center;color:#999;padding:40px 0;font-size:14px;">✅ ไม่มีเอกสารรอตรวจสอบ</p>';return;}
+  el.innerHTML=bks.map(b=>docCard(b,true)).join('');
+}
+function renderCApproved(){
+  const bks=ld('bookings').filter(b=>b.dsts==='อนุมัติแล้ว');
+  const el=q('c-approved-list');
+  if(!bks.length){el.innerHTML='<p style="text-align:center;color:#999;padding:40px 0;">ยังไม่มี</p>';return;}
+  el.innerHTML=bks.map(b=>docCard(b,false)).join('');
+}
+function renderCRevision(){
+  const bks=ld('bookings').filter(b=>b.dsts==='รอการแก้ไข');
+  const el=q('c-revision-list');
+  if(!bks.length){el.innerHTML='<p style="text-align:center;color:#999;padding:40px 0;">ไม่มีรายการ</p>';return;}
+  el.innerHTML=bks.map(b=>docCard(b,false)).join('');
+}
+function docCard(b,showBtn){
+  return `<div class="booking-card">
+    <div class="bc-hd">
+      <div>
+        <div style="font-size:18px;font-weight:800;color:var(--primary);">${b.q}</div>
+        <div style="font-size:13px;font-weight:600;">${b.sname} (${b.sid})</div>
+        <div style="font-size:11px;color:#666;margin-top:2px;">
+          📚 ${b.br} · ปี ${b.yr} | 🛎️ ${b.svc} | 📅 ${fmtD(b.dt)} ${b.time} น.
+        </div>
+      </div>
+      <span class="badge ${dbCls(b.dsts)}">${b.dsts}</span>
+    </div>
+    ${b.note?`<div style="background:#f8f9fa;padding:7px 11px;border-radius:8px;font-size:11px;color:#555;margin-bottom:8px;">📝 ${b.note}</div>`:''}
+    <div style="font-size:11px;font-weight:600;color:#555;margin-bottom:6px;">📎 เอกสาร (${b.files.length} ไฟล์):</div>
+    ${b.files.map(f=>`<div class="doc-item">
+      <div class="doc-item-l">${f.tp.includes('pdf')?'📄':'🖼️'} ${f.name} <span style="color:#999;font-size:10px;">(${(f.size/1024).toFixed(1)}KB)</span></div>
+    </div>`).join('')}
+    ${b.cmt?`<div class="cmt-box"><div class="cmt-hd">💬 ${b.reviewBy} (${fmtDT(b.reviewAt)})</div><div class="cmt-txt">${b.cmt}</div></div>`:''}
+    ${showBtn?`<div style="margin-top:12px;"><button class="btn-s" onclick="openReview(${b.id})">📝 ตรวจสอบ / Comment</button></div>`:''}
+  </div>`;
+}
+function openReview(id){
+  reviewId=id;
+  const b=ld('bookings').find(x=>x.id===id);
+  q('review-cmt').value=b.cmt||'';
+  q('review-content').innerHTML=`
+    <div style="background:#f0f4ff;border-radius:10px;padding:12px;margin-bottom:14px;">
+      <div style="font-weight:700;color:var(--primary);margin-bottom:4px;">${b.q} — ${b.sname}</div>
+      <div style="font-size:12px;color:#555;">${b.br} · ${b.svc} · ${fmtD(b.dt)} เวลา ${b.time} น.</div>
+    </div>
+    ${b.files.map(f=>`<div class="doc-item" style="margin-bottom:6px;">
+      <div class="doc-item-l">${f.tp.includes('pdf')?'📄':'🖼️'} ${f.name}</div>
+      <span style="font-size:10px;color:#999;">${(f.size/1024).toFixed(1)}KB</span>
+    </div>`).join('')}`;
+  q('modal-review').classList.remove('hidden');
+}
+function closeReview(){q('modal-review').classList.add('hidden');reviewId=null;}
+function doApprove(){saveReview('อนุมัติแล้ว');}
+function doRevision(){
+  if(!V('review-cmt').trim()){alert('⚠️ กรุณาระบุ comment / สิ่งที่ต้องแก้ไข');return;}
+  saveReview('รอการแก้ไข');
+}
+function saveReview(dsts){
+  const cmt=V('review-cmt').trim();
+  const bks=ld('bookings');
+  const b=bks.find(x=>x.id===reviewId);
+  if(b){b.dsts=dsts;b.cmt=cmt;b.reviewBy=CU.name;b.reviewAt=new Date().toISOString();sv('bookings',bks);}
+  closeReview();
+  renderCReview(); renderCApproved(); renderCRevision();
+}
+
+// ══════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════
+const q=id=>document.getElementById(id);
+const V=id=>q(id)?.value?.trim()||'';
+const tog=(id,cls,cond)=>q(id).classList.toggle(cls,cond);
+const today=()=>new Date().toISOString().split('T')[0];
+
+function sbCls(s){return{'รอเรียก':'bw','กำลังดำเนินการ':'bc','เสร็จสิ้น':'bd'}[s]||'bw';}
+function dbCls(s){return{'รอตรวจสอบ':'bdi','อนุมัติแล้ว':'ba','รอการแก้ไข':'br','ไม่มีเอกสาร':'bd'}[s]||'bdi';}
+
+function fmtD(str){
+  if(!str)return'-';
+  const [y,m,d]=str.split('-');
+  const mo=['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return `${+d} ${mo[+m]} ${+y+543}`;
+}
+function fmtDT(iso){
+  if(!iso)return'';
+  const d=new Date(iso);
+  return d.toLocaleDateString('th-TH')+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ══════════════════════════════════════════
+//  NUMBER INPUT RESTRICTION
+// ══════════════════════════════════════════
+['r-id','r-ph','sl-id'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el)el.addEventListener('input',function(){this.value=this.value.replace(/\D/g,'');});
+});
+
+// Enter key support
+document.getElementById('sl-pw').addEventListener('keypress',e=>{if(e.key==='Enter')loginStudent();});
+document.getElementById('al-pw').addEventListener('keypress',e=>{if(e.key==='Enter')loginAdmin();});
+document.getElementById('cl-pw').addEventListener('keypress',e=>{if(e.key==='Enter')loginCom();});
+</script>
+</body>
+</html>
